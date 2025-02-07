@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Matching App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen p-6">
+
+    <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-md text-center">
+        <h1 class="text-2xl font-bold mb-4 text-gray-700">Face Matching App</h1>
+        
+        <!-- Upload Form -->
+        <form id="upload-form" enctype="multipart/form-data" class="mb-4">
+            <input type="file" id="imageInput" name="file" accept="image/*" class="block w-full mb-2 p-2 border border-gray-300 rounded">
+            <input type="email" id="emailInput" name="email" placeholder="Enter your email" class="block w-full mb-2 p-2 border border-gray-300 rounded" required>
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 w-full">Upload & Match</button>
+        </form>
+
+        <!-- Take Selfie -->
+        <button id="take-selfie" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 mb-4 w-full">Take a Selfie</button>
+        
+        <video id="video" class="hidden w-full h-48 border border-gray-400"></video>
+        <canvas id="canvas" class="hidden"></canvas>
+        <button id="capture" class="hidden bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 mt-2 w-full">Capture</button>
+
+        <!-- Loading Indicator -->
+        <div id="loading" class="hidden mt-4 text-gray-600">Processing... Please wait.</div>
+    </div>
+    
+    <!-- Matched Images -->
+    <div id="matched-images" class="mt-6 w-full flex flex-wrap justify-center"></div>
+
+    <script>
+        document.getElementById("take-selfie").addEventListener("click", function() {
+            let video = document.getElementById("video");
+            let captureButton = document.getElementById("capture");
+            video.classList.remove("hidden");
+            captureButton.classList.remove("hidden");
+            
+            navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
+                video.srcObject = stream;
+                video.play();
+            });
+        });
+
+        document.getElementById("capture").addEventListener("click", function() {
+            let canvas = document.getElementById("canvas");
+            let video = document.getElementById("video");
+            let context = canvas.getContext("2d");
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            canvas.toBlob(blob => {
+                let file = new File([blob], "selfie.jpg", { type: "image/jpeg" });
+                uploadFile(file);
+            }, "image/jpeg");
+        });
+
+        document.getElementById("upload-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+            let file = document.getElementById("imageInput").files[0];
+            uploadFile(file);
+        });
+
+        function uploadFile(file) {
+            if (!file) {
+                alert("Please select a file first.");
+                return;
+            }
+            let email = document.getElementById("emailInput").value;
+            if (!email) {
+                alert("Please enter your email.");
+                return;
+            }
+
+            let formData = new FormData();
+            formData.append("file", file);
+            formData.append("email", email);
+
+            document.getElementById("loading").classList.remove("hidden");
+
+            fetch("/upload", { method: "POST", body: formData })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("loading").classList.add("hidden");
+                    displayMatchedImages(data.matched_images);
+                })
+                .catch(error => {
+                    document.getElementById("loading").classList.add("hidden");
+                    alert("Error: " + error);
+                });
+        }
+
+        function displayMatchedImages(images) {
+            let container = document.getElementById("matched-images");
+            container.innerHTML = "";
+            images.forEach(img => {
+                let imgElement = document.createElement("img");
+                imgElement.src = img;
+                imgElement.classList.add("m-2", "border", "border-gray-400", "rounded", "w-32", "h-32");
+                container.appendChild(imgElement);
+            });
+        }
+    </script>
+
+</body>
+</html>
