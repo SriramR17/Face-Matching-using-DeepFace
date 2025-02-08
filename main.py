@@ -5,7 +5,7 @@ from actions.email_sender import send_email_with_images
 
 # Paths & Configurations
 reference_image_path = "https://a1cf74336522e87f135f-2f21ace9a6cf0052456644b80fa06d4f.ssl.cf2.rackcdn.com/images/characters/large/800/Phil-Dunphy.Modern-Family.webp"  # Change to your reference image
-google_drive_folder_id = "1Ck-RHRZVNSCqUUismv_XXg4_jAaTWRRk"  # Replace with your Drive folder ID 
+google_drive_folder_id = "1"  # Replace with your Drive folder ID 
 receiver_email = "bigiljd282@gmail.com"  # ✅ Update with recipient email
 
 # Download only missing images from Drive
