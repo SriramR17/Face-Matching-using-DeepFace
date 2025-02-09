@@ -39,7 +39,7 @@ def upload_file():
         file.save(filepath)
         
         # Process the image
-        google_drive_folder_id = ""  # Replace with your folder ID
+        google_drive_folder_id = "1Ck-RHRZVNSCqUUismv_XXg4_jAaTWRRk"  # Replace with your folder ID
         group_photos = download_images_from_drive(google_drive_folder_id)
         matched_images, unmatched_images = match_faces(filepath, group_photos)
         
