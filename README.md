@@ -40,6 +40,14 @@ source venv/bin/activate  # On macOS/Linux
 venv\Scripts\activate     # On Windows
 ```
 
+
+**Option 2: Using Conda Environment**
+   - Create a Conda environment:
+     ```bash
+     conda create --name face-matching python=3.10
+     conda activate face-matching
+     ```
+
 ### **3️⃣ Install Dependencies**  
 ```sh
 pip install -r requirements.txt
@@ -60,7 +68,7 @@ Now, open your browser and go to:
 
 ## 📩 Send Matched Images via Email  
 - Users can enter their **email address**  
-- Click the **"Send Matched Images"** button  
+- Click the **"Send Email"** button  
 - Matched images will be emailed to them  
 
 ---
