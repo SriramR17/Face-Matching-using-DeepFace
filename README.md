@@ -56,7 +56,7 @@ pip install -r requirements.txt
 ### **4️⃣ Set Up Google Drive API**  
 - Download your **Google Drive API `credentials.json`**  
 - Place it in the **project root directory**  
-- Set the json file path in goolge_drive_utils.py file in **actions** folder
+- Set the json file path in `google_drive_urils.py`** file in **actions** folder
 
 ### **5️⃣ Run the Flask Application**  
 ```sh
