@@ -1,5 +1,10 @@
 # Face Matching Web Application  
 
+This project is a Flask-based AI-powered face matching web application that enables users to upload an image or take a selfie, which is then compared with a folder of group images stored in Google Drive. The matched images are displayed on the webpage, and users can choose to send them via email.
+
+The web application is built using DeepFace for face matching, OpenCV for face detection, Flask for the backend, and HTML, Tailwind CSS, and JavaScript for the frontend.
+
+
 ## 📌 Overview  
 This web application enables users to:
 - **Upload an image** or **take a selfie**  
