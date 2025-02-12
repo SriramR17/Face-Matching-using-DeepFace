@@ -8,11 +8,19 @@ from actions.email_sender import send_email_with_images
 import cv2
 import numpy as np
 import base64
+import re
+from datetime import datetime
+from dotenv import load_dotenv
 
-app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'uploads'
+load_dotenv()
+
+app = Flask(__name__,static_folder='static')
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max-limit
 
+for directory in ['uploads', 'downloaded_images', 'matched_images']:
+    os.makedirs(os.path.join(os.path.dirname(os.path.abspath(__file__)), directory), exist_ok=True)
 # Ensure upload directory exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
@@ -65,41 +73,49 @@ def upload_file():
 
 @app.route('/capture', methods=['POST'])
 def capture_image():
-    # Handle webcam capture data
-    image_data = request.json.get('image')
-    if not image_data:
-        return jsonify({'error': 'No image data received'}), 400
-    
-    # Convert base64 to image
     try:
-        image_data = image_data.split(',')[1]
+        # Get base64 image data
+        image_data = request.json.get('image')
+        if not image_data:
+            return jsonify({'error': 'No image data received'}), 400
+
+        # Remove data URL prefix if present
+        if 'base64,' in image_data:
+            image_data = image_data.split('base64,')[1]
+
+        # Convert base64 to image
         image_bytes = base64.b64decode(image_data)
         nparr = np.frombuffer(image_bytes, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-        
-        # Save captured image
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], 'captured.jpg')
+
+        if img is None:
+            return jsonify({'error': 'Invalid image data'}), 400
+
+        # Save captured image with timestamp
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], f'captured_{timestamp}.jpg')
         cv2.imwrite(filepath, img)
-        
-        # Process the image (same as upload route)
-        google_drive_folder_id = "1"
+
+        # Process the image
+        google_drive_folder_id = "1Ck-RHRZVNSCqUUismv_XXg4_jAaTWRRk"
         group_photos = download_images_from_drive(google_drive_folder_id)
         matched_images, unmatched_images = match_faces(filepath, group_photos)
-        
+
         # Convert matched images to base64
         matched_images_b64 = []
-        for img in matched_images:
-            _, buffer = cv2.imencode('.jpg', img)
+        for matched_img in matched_images:
+            _, buffer = cv2.imencode('.jpg', matched_img)
             img_b64 = base64.b64encode(buffer).decode('utf-8')
             matched_images_b64.append(img_b64)
-        
+
         return jsonify({
             'success': True,
             'matched_images': matched_images_b64
         })
-    
+
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        print(f"Error processing captured image: {str(e)}")
+        return jsonify({'error': 'Failed to process captured image'}), 500
     
 @app.route('/send_email', methods=['POST'])
 def send_email():

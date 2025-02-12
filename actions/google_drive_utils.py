@@ -3,18 +3,23 @@ import io
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 from google.oauth2 import service_account
+from dotenv import load_dotenv
+
+
+load_dotenv()
 
 SCOPES = ['https://www.googleapis.com/auth/drive']
-SERVICE_ACCOUNT_FILE = r'D:\python\Face matching\credentials.json'  # Update with your file
 
-# Authenticate Google Drive API
-creds = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+creds = service_account.Credentials.from_service_account_info(
+    eval(os.getenv('GOOGLE_CREDENTIALS')),
+    scopes=SCOPES
+)
 drive_service = build('drive', 'v3', credentials=creds)
 
 def download_images_from_drive(folder_id, local_folder="downloaded_images"):
     """ Downloads only missing images from Google Drive """
     if not os.path.exists(local_folder):
-        os.makedirs(local_folder)
+        os.makedirs(local_folder) 
 
     existing_files = set(os.listdir(local_folder))
     query = f"'{folder_id}' in parents and mimeType contains 'image/'"

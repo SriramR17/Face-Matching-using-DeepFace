@@ -5,11 +5,13 @@ import mimetypes
 import smtplib
 import ssl
 from email.message import EmailMessage
+from dotenv import load_dotenv
+load_dotenv()
 
 SMTP_SERVER = "smtp.gmail.com"  # Update for Outlook/Yahoo if needed
 SMTP_PORT = 587  # Standard SMTP port for TLS
-EMAIL_SENDER = "sriramr958@gmail.com"  # ✅ Your email
-EMAIL_PASSWORD = "dgwi uoxk icbz gppb"   # ✅ Generate an App Password
+EMAIL_SENDER = os.getenv('EMAIL_SENDER')
+EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')   # ✅ Generate an App Password
 
 def save_matched_images(images, output_folder="matched_images"):
     """ Saves matched images locally before sending via email """
